@@ -14,7 +14,7 @@ mkdir ../../deploy/$CI_BUILD_ID -p
 wget -O ../../deploy/$CI_BUILD_ID/MonoWebPublisher.exe https://github.com/z-ji/MonoWebPublisher/releases/download/v0.1/MonoWebPublisher.exe
 echo 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $*' > ../../deploy/$CI_BUILD_ID/ssh
 chmod +x ../../deploy/$CI_BUILD_ID/ssh
-GIT_TRACE=1 GIT_SSH=../../deploy/$CI_BUILD_ID/ssh git clone git@repo.z7.org.uk:zji/sandboxmvc4-deploy.git ../../deploy/$CI_BUILD_ID/sandboxmvc4-deploy
+GIT_TRACE=1 GIT_SSH=../../deploy/$CI_BUILD_ID/ssh git clone repourl.git ../../deploy/$CI_BUILD_ID/sandboxmvc4-deploy
 mono ../../deploy/$CI_BUILD_ID/MonoWebPublisher.exe SandboxMVC4/SandboxMVC4.csproj ../../deploy/$CI_BUILD_ID/sandboxmvc4-deploy
 cd ../../deploy/$CI_BUILD_ID/sandboxmvc4-deploy
 git add .
