@@ -7,7 +7,8 @@ Inspired by this thread http://stackoverflow.com/questions/14296517/mono-xbuild-
 
 Here is a sample script for building a ASP.NET MVC 4 project and pushing to deploy repository with gitlab in linux environment.
 ```bash
-(
+pwd=$(pwd)
+trap "{ cd $pwd; rm ../../deploy/$CI_BUILD_ID -rf; }" EXIT
 git submodule update --init
 xbuild SandboxMVC4.sln /p:Configuration=Release
 mkdir ../../deploy/$CI_BUILD_ID -p
@@ -20,6 +21,4 @@ cd ../../deploy/$CI_BUILD_ID/sandboxmvc4-deploy
 git add .
 git diff-index --quiet HEAD || git commit -a -m "build:$CI_BUILD_ID"
 GIT_TRACE=1 GIT_SSH=../ssh git push -u origin master
-)
-rm ../../deploy/$CI_BUILD_ID -rf
 ```
