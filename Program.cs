@@ -62,7 +62,7 @@ namespace MonoWebPublisher
             xmlDoc = XDocument.Load(projectFile);
             var result = xmlDoc.Descendants(xmlDoc.Root.Name.Namespace + "Content")
                 .Where(node => node.Attribute("Include") != null)
-                .Select(node => node.Attribute("Include").Value.Replace("\\", Path.DirectorySeparatorChar.ToString()));
+                .Select(node =>  System.Net.WebUtility.UrlDecode(node.Attribute("Include").Value.Replace("\\", Path.DirectorySeparatorChar.ToString())));
 
             return result.ToList<string>();
         }
