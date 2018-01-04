@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
+using System.Xml.XPath;
+using System.Xml.Xsl;
 
 namespace MonoWebPublisher
 {
@@ -19,6 +22,11 @@ namespace MonoWebPublisher
             string projectFile = args[0];
             string destDir = args[1];
             string sourceDir = Path.GetDirectoryName(projectFile);
+
+            // Find out if web.config should be transformed
+            var webConfig = Path.Combine(sourceDir, "Web.config");
+            var webConfigTransform = Path.Combine(sourceDir, "Web.Release.config");
+            bool shouldTransformWebConfig = File.Exists(webConfig) && File.Exists(webConfigTransform);
 
             //delete everything in destDir but .git folder
             if (Directory.Exists(destDir))
@@ -43,8 +51,12 @@ namespace MonoWebPublisher
             List<string> fileList = GetIncludedFiles(projectFile);
             fileList.ForEach(n =>
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(destDir, n)));
-                File.Copy(Path.Combine(sourceDir, n), Path.Combine(destDir, n), true);
+                bool isWebConfig = n.StartsWith("Web.") && n.EndsWith(".config");
+                if (!shouldTransformWebConfig || !isWebConfig)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(destDir, n)));
+                    File.Copy(Path.Combine(sourceDir, n), Path.Combine(destDir, n), true);
+                }
             });
 
             //copy bin folder
@@ -54,6 +66,22 @@ namespace MonoWebPublisher
             {
                 File.Copy(n, Path.Combine(Path.Combine(destDir, "bin"), Path.GetFileName(n)), true);
             });
+
+            // Transform web.config
+            if (shouldTransformWebConfig)
+            {
+                var xmlDoc = new XmlDataDocument();
+                xmlDoc.PreserveWhitespace = true;
+                xmlDoc.Load(webConfig);
+
+                var transformation = new Microsoft.Web.XmlTransform.XmlTransformation(webConfigTransform);
+                transformation.Apply(xmlDoc);
+
+                var outputWebConfig = Path.Combine(destDir, "Web.config");
+                var xmlWriter = XmlWriter.Create(outputWebConfig);
+                xmlDoc.WriteTo(xmlWriter);
+                xmlWriter.Close();
+            }
         }
 
         private static List<string> GetIncludedFiles(string projectFile)
