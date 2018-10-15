@@ -14,18 +14,28 @@ namespace MonoWebPublisher
         /// <example>mono MonoWebPublisher.exe sample.csproj /var/www/sample-dest-publish-dir</example>
         static void Main(string[] args)
         {
-            if (args.Length != 2)
+            if (args.Length != 2 && args.Length != 3)
             {
                 Console.WriteLine("Parameter not match!");
                 Environment.Exit(1);
             }
             string projectFile = args[0];
             string destDir = args[1];
+            string configuration = "Release";
+            try
+            {
+                configuration = args[2];
+            }
+            catch
+            {
+                //ignore
+            }
+
             string sourceDir = Path.GetDirectoryName(projectFile);
 
             // Find out if web.config should be transformed
             var webConfig = Path.Combine(sourceDir, "Web.config");
-            var webConfigTransform = Path.Combine(sourceDir, "Web.Release.config");
+            var webConfigTransform = Path.Combine(sourceDir, "Web." + configuration + ".config");
             bool shouldTransformWebConfig = File.Exists(webConfig) && File.Exists(webConfigTransform);
 
             //delete everything in destDir but .git folder
